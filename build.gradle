@@ -1,13 +1,15 @@
 import com.gtnewhorizons.retrofuturagradle.mcp.InjectTagsTask
 import org.jetbrains.gradle.ext.Gradle
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     id 'java'
     id 'maven-publish'
     id 'java-library'
+    id 'scala'
+    id 'com.github.johnrengelman.shadow' version "8.1.1"
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.7'
     id 'com.gtnewhorizons.retrofuturagradle' version '1.3.35'
-    id 'com.diffplug.spotless' version '7.0.0.BETA2' apply false
 }
 
 base {
@@ -28,6 +30,8 @@ java {
 configurations {
     embed
     implementation.extendsFrom(embed)
+    shade
+    implementation.extendsFrom(shade)
 }
 
 minecraft {
@@ -59,9 +63,23 @@ repositories {
         name 'CleanroomMC Maven'
         url 'https://maven.cleanroommc.com'
     }
+    maven {
+        name 'Modrinth'
+        url 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
+    flatDir {
+        dir 'lib'
+    }
 }
 
 dependencies {
+    implementation "org.scala-lang:scala-library:2.13.15"
+    implementation "org.scala-lang:scala3-library_3:3.0.2"
+    implementation 'lib:scala3std:1.0.0'
+
     implementation 'org.jetbrains:annotations:24.0.0'
 
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
@@ -89,19 +107,6 @@ if (!access_transformer.isEmpty()) {
             tasks.srgifyBinpatchedJar.accessTransformerFiles.from(fileLocation)
         } else {
             throw new GradleException("Access Transformer file [$fileLocation] does not exist!")
-        }
-    }
-}
-
-if (Boolean.valueOf(use_spotless)) {
-    apply plugin: "com.diffplug.spotless"
-
-    spotless {
-        java {
-            importOrder('java|javax', '', 'net.minecraft', 'net.minecraftforge')
-            removeUnusedImports()
-            indentWithSpaces()
-            trimTrailingWhitespace()
         }
     }
 }
@@ -248,4 +253,37 @@ idea.project.settings {
     taskTriggers {
         afterSync 'cleanroomAfterSync'
     }
+}
+
+compileScala {
+    scalaCompileOptions.additionalParameters = ["-Xtarget", "8"] // scala/scala3#13810
+}
+
+// Use shadowJar to rename `scala` to `scala3`
+tasks.named('shadowJar', ShadowJar) {
+    relocate 'scala.', 'scala3.' // It should be declare more detailed for compat
+    configurations = [project.configurations.shade]
+}
+
+tasks.named("build") {
+    dependsOn(tasks.named("shadowJar"))
+}
+
+// This task is used to make `runClient` using `shadow jar` instead of `common jar`.
+tasks.register('shadowCopy', Copy) {
+    from 'build/libs'
+    into 'build/libs'
+    rename { String fileName ->
+        fileName.replace('-all', '-dev') // Depend which framework you are using
+    }
+    include("*-all.jar")
+}
+
+tasks.named("jar") {
+    dependsOn(tasks.named("shadowJar"))
+    finalizedBy(tasks.named("shadowCopy"))
+}
+
+tasks.named("runClient") {
+    mustRunAfter(tasks.named("shadowCopy"))
 }
