@@ -271,19 +271,20 @@ tasks.named("build") {
 
 // This task is used to make `runClient` using `shadow jar` instead of `common jar`.
 tasks.register('shadowCopy', Copy) {
+    mustRunAfter(tasks.named("shadowJar"))
+
     from 'build/libs'
     into 'build/libs'
     rename { String fileName ->
-        fileName.replace('-all', '-dev') // Depend which framework you are using
+        fileName.replace('-all', '-dev')
     }
     include("*-all.jar")
 }
 
 tasks.named("jar") {
     dependsOn(tasks.named("shadowJar"))
-    finalizedBy(tasks.named("shadowCopy"))
 }
 
-tasks.named("runClient") {
-    mustRunAfter(tasks.named("shadowCopy"))
+tasks.named("packageMcLauncher") {
+    dependsOn(tasks.named("shadowCopy"))
 }

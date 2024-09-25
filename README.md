@@ -4,4 +4,5 @@
 Re-write by TemplateDevEnv and YemplateDevEnv.
 
 # Credits
-- [H2Sxxa](https://github.com/H2Sxxa) | Scalar4F
+
+- [H2Sxxa](https://github.com/H2Sxxa) | [Scala3Std](https://github.com/H2Sxxa/Scala3Std)
