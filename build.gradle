@@ -262,12 +262,14 @@ idea.project.settings {
     }
 }
 
-compileScala {
-    scalaCompileOptions.additionalParameters = ["-Xtarget", "8"] // scala/scala3#13810
-}
+
 
 
 if (project.use_scala3.toBoolean()) {
+    compileScala {
+        scalaCompileOptions.additionalParameters = ["-Xtarget", "8"] // scala/scala3#13810
+    }
+    
     // Use shadowJar to rename `scala` to `scala3`
     tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
         relocate 'scala.', 'scala3.' // It should be declare more detailed for compat
