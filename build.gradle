@@ -13,6 +13,8 @@ base {
     archivesName.set(mod_id)
 }
 
+version = mod_version
+
 tasks.decompressDecompiledSources.enabled !Boolean.valueOf(change_minecraft_sources)
 
 java {
