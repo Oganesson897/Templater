@@ -71,7 +71,7 @@ dependencies {
     patchedMinecraft 'me.eigenraven.java8unsupported:java-8-unsupported-shim:1.0.0'
 
     if (Boolean.valueOf(use_mixins)) {
-        def mixin = modUtils.enableMixins('zone.rong:mixinbooter:9.3', "mixins.${mod_id}.refmap.json")
+        def mixin = modUtils.enableMixins('zone.rong:mixinbooter:10.2', "mixins.${mod_id}.refmap.json")
         api (mixin) {transitive = false}
         annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
         annotationProcessor 'com.google.guava:guava:32.1.2-jre'
