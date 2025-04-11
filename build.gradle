@@ -67,7 +67,9 @@ dependencies {
 
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
     annotationProcessor 'net.java.dev.jna:jna-platform:5.13.0'
-    compileOnly ('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0') {transitive = false}
+    compileOnly ('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0') {
+        transitive = false
+    }
     patchedMinecraft 'me.eigenraven.java8unsupported:java-8-unsupported-shim:1.0.0'
 
     if (Boolean.valueOf(use_mixins)) {
